@@ -15,7 +15,7 @@ permissions:
   packages: write # needed to push to ghcr
 
 jobs:
-  build-test-push:
+  build-push:
     runs-on: ubuntu-latest
 
     steps:

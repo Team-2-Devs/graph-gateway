@@ -1,3 +1,3 @@
-namespace Messaging.RabbitMQ;
+// namespace Messaging.RabbitMQ;
 
-public enum ExchangeKind { Direct, Fanout, Topic, Headers }
+// public enum ExchangeKind { Direct, Fanout, Topic, Headers }
