@@ -8,7 +8,6 @@ on:
 
 env:
   IMAGE_REGISTRY: ghcr.io
-  IMAGE_OWNER: ${{ github.repository_owner }}
   IMAGE_NAME: graph-gateway
 
 permissions:
@@ -23,6 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Set lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -37,4 +39,4 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }} # ensures push on main/tags, not pull requests
           tags: |
-            ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_OWNER }}.toLowerCase()/${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:latest
