@@ -37,4 +37,4 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }} # ensures push on main/tags, not pull requests
           tags: |
-            ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_OWNER }}.toLowerCase()/${{ env.IMAGE_NAME }}:latest
