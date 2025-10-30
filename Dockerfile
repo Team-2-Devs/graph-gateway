@@ -2,9 +2,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Add GitHub Packages feed
-RUN dotnet nuget add source https://nuget.pkg.github.com/team-2-devs/index.json \
-    --name github
+ARG GH_OWNER=team-2-devs
+ARG GH_USER
+ARG GH_TOKEN
+
+# Add GitHub Packages NuGet source with credentials
+RUN dotnet nuget add source https://nuget.pkg.github.com/${GH_OWNER}/index.json \
+    --name github \
+    --username "${GH_USER}" \
+    --password "${GH_TOKEN}" \
+    --store-password-in-clear-text
 
 # Copy csproj
 COPY GraphGateway.csproj .
