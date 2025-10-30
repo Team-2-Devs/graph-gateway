@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using HotChocolate.Subscriptions;

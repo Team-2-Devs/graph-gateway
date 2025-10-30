@@ -2,6 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Add GitHub Packages feed
+RUN dotnet nuget add source https://nuget.pkg.github.com/team-2-devs/index.json \
+    --name github
+
 # Copy csproj
 COPY GraphGateway.csproj .
 RUN dotnet restore GraphGateway.csproj
