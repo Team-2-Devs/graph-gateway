@@ -5,4 +5,4 @@ Microservice serving as the API facade and application gateway for the system. P
 
 ![Design Class Diagram](docs/images/graph-gateway-dcd.jpg)
 
-See the [full system overview](https://github.com/team-2-devs/infra-core)
+See the [full system overview](https://github.com/team-2-devs/infra-core) in the **infra-core** repository.
