@@ -3,6 +3,12 @@ Microservice serving as the API facade and application gateway for the system. P
 
 ---
 
+## Codebase Architecture
+
+![Codebase Architecture](docs/images/graph-gateway-codebase-architecture.jpg)
+
+---
+
 ## Design Class Diagram
 
 ![Design Class Diagram](docs/images/graph-gateway-dcd.jpg)
