@@ -14,23 +14,23 @@ namespace GraphGateway.Workers;
 /// </summary>
 public sealed class RabbitToSubscriptions : BackgroundService
 {
-    private readonly ITopicEventSender _pub;
+    private readonly ITopicEventSender _publisher;
     private readonly string _host, _user, _pass;
 
     // RabbitMQ exchange names
-    private const string StartedExchange = Exchanges.AnalysisStarted, CompletedExchange = Exchanges.AnalysisCompleted;
+    private const string _startedExchange = Exchanges.AnalysisStarted, _completedExchange = Exchanges.AnalysisCompleted;
 
     // GraphQL-specific queues bound to the exchanges
-    private const string GraphStartedQueue = "graph.subs.started", GraphCompletedQueue = "graph.subs.completed";
+    private const string _graphStartedQueue = "graph.subs.started", _graphCompletedQueue = "graph.subs.completed";
 
     // HotChocolate subscription topics (must match [Topic(...)] attributes in resolvers)
-    private const string StartedTopic = "analysis/started", CompletedTopic = "analysis/completed";
+    private const string _startedTopic = "analysis/started", _completedTopic = "analysis/completed";
 
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
 
-    public RabbitToSubscriptions(ITopicEventSender pub, string host, string user, string pass)
+    public RabbitToSubscriptions(ITopicEventSender publisher, string host, string user, string pass)
     {
-        _pub = pub;
+        _publisher = publisher;
         (_host, _user, _pass) = (host, user, pass);
     }
 
@@ -56,14 +56,14 @@ public sealed class RabbitToSubscriptions : BackgroundService
                 await using var ch = await conn.CreateChannelAsync();
 
                 // --- Ensure exchanges and queues exist ---
-                await ch.ExchangeDeclareAsync(StartedExchange, ExchangeType.Fanout, durable: true);
-                await ch.ExchangeDeclareAsync(CompletedExchange, ExchangeType.Fanout, durable: true);
+                await ch.ExchangeDeclareAsync(_startedExchange, ExchangeType.Fanout, durable: true);
+                await ch.ExchangeDeclareAsync(_completedExchange, ExchangeType.Fanout, durable: true);
 
-                await ch.QueueDeclareAsync(GraphStartedQueue, durable: true, exclusive: false, autoDelete: false);
-                await ch.QueueDeclareAsync(GraphCompletedQueue, durable: true, exclusive: false, autoDelete: false);
+                await ch.QueueDeclareAsync(_graphStartedQueue, durable: true, exclusive: false, autoDelete: false);
+                await ch.QueueDeclareAsync(_graphCompletedQueue, durable: true, exclusive: false, autoDelete: false);
 
-                await ch.QueueBindAsync(GraphStartedQueue, StartedExchange, "");
-                await ch.QueueBindAsync(GraphCompletedQueue, CompletedExchange, "");
+                await ch.QueueBindAsync(_graphStartedQueue, _startedExchange, "");
+                await ch.QueueBindAsync(_graphCompletedQueue, _completedExchange, "");
 
                 // Consumer for started events
                 var started = new AsyncEventingBasicConsumer(ch);
@@ -74,7 +74,7 @@ public sealed class RabbitToSubscriptions : BackgroundService
                     if (evt is not null)
                     {
                         // Forward into GraphQL subscription pipeline
-                        await _pub.SendAsync(StartedTopic, evt, ct);
+                        await _publisher.SendAsync(_startedTopic, evt, ct);
                     }
                 };
 
@@ -83,12 +83,12 @@ public sealed class RabbitToSubscriptions : BackgroundService
                 completed.ReceivedAsync += async (_, ea) =>
                 {
                     var evt = JsonSerializer.Deserialize<AnalysisCompleted>(ea.Body.Span, JsonOpts);
-                    if (evt is not null) await _pub.SendAsync(CompletedTopic, evt, ct);
+                    if (evt is not null) await _publisher.SendAsync(_completedTopic, evt, ct);
                 };
 
                 // Start consuming both queues (autoAck enabled)
-                await ch.BasicConsumeAsync(GraphStartedQueue, autoAck: true, started, ct);
-                await ch.BasicConsumeAsync(GraphCompletedQueue, autoAck: true, completed, ct);
+                await ch.BasicConsumeAsync(_graphStartedQueue, autoAck: true, started, ct);
+                await ch.BasicConsumeAsync(_graphCompletedQueue, autoAck: true, completed, ct);
 
                 // Stay alive until shutdown or the connection drops
                 await Task.Delay(Timeout.Infinite, ct);

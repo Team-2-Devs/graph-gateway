@@ -60,7 +60,7 @@ var app = builder.Build();
 app.UseWebSockets();
 app.UseGatewayJwtAuth();
 
-app.MapGraphQL("/graphql");
+app.MapGraphQL("/graphql").AllowAnonymous();
 
 // By filtering by tag, we prevent all checks from failing together.
 // This way, each endpoint only runs its own checks.

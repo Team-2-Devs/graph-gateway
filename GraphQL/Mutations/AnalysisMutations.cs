@@ -9,7 +9,7 @@ namespace GraphGateway.GraphQL.Mutations;
 public class AnalysisMutations
 {
     [Authorize(Policy = "RequireApiScope")]
-    public async Task<AnalysisRequestPayload> RequestAnalysis(AnalysisRequestInput input,
+    public async Task<AnalysisRequestPayload> RequestAnalysisAsync(AnalysisRequestInput input,
         [Service] ICommandPublisher publisher, CancellationToken ct)
     {
         string correlationId = Guid.NewGuid().ToString("n");
