@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-ARG GH_OWNER=team-2-devs
+ARG GH_OWNER
 ARG GH_USER
 ARG GH_TOKEN
 
