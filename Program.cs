@@ -20,22 +20,29 @@ var rabbitHost = RequireEnv("RABBIT_HOST");
 var rabbitUser = RequireEnv("RABBIT_USER");
 var rabbitPass = RequireEnv("RABBIT_PASS");
 
+var apiKey = RequireEnv("INTERNAL_AUTH_API_KEY");
+
 builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
     .AddQueryType(d => d.Name("Query"))
         .AddTypeExtension<QueryRoot>()
     .AddMutationType(d => d.Name("Mutation"))
-        .AddTypeExtension<AnalysisMutations>()
+        .AddTypeExtension<UploadMutations>()
     .AddSubscriptionType(d => d.Name("Subscription"))
         .AddTypeExtension<AnalysisSubscriptions>()
     .AddInMemorySubscriptions();
 
 builder.Services.AddGatewayJwtAuth(builder.Configuration);
 
-builder.Services.AddSingleton(sp => new RabbitMqPublisher(rabbitHost, rabbitUser, rabbitPass));
-builder.Services.AddSingleton<ICommandPublisher>(sp => sp.GetRequiredService<RabbitMqPublisher>());
-builder.Services.AddSingleton<IEventPublisher>(sp => sp.GetRequiredService<RabbitMqPublisher>());
+builder.Services.AddSingleton(sp => new RabbitMQPublisher(rabbitHost, rabbitUser, rabbitPass));
+builder.Services.AddSingleton<IEventPublisher>(sp => sp.GetRequiredService<RabbitMQPublisher>());
+
+builder.Services.AddHttpClient("ingestion", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:9090/");
+    client.DefaultRequestHeaders.Add("X-Internal-Auth", apiKey);
+});
 
 builder.Services.AddHostedService(sp =>
     new RabbitToSubscriptions(
