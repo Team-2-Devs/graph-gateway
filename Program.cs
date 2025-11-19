@@ -20,6 +20,7 @@ var rabbitHost = RequireEnv("RABBIT_HOST");
 var rabbitUser = RequireEnv("RABBIT_USER");
 var rabbitPass = RequireEnv("RABBIT_PASS");
 
+var ingestionBase = RequireEnv("INGESTION_BASE_URL");
 var apiKey = RequireEnv("INTERNAL_AUTH_API_KEY");
 
 builder.Services
@@ -40,7 +41,7 @@ builder.Services.AddSingleton<IEventPublisher>(sp => sp.GetRequiredService<Rabbi
 
 builder.Services.AddHttpClient("ingestion", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:9090/");
+    client.BaseAddress = new Uri(ingestionBase);
     client.DefaultRequestHeaders.Add("X-Internal-Auth", apiKey);
 });
 
