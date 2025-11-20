@@ -75,7 +75,6 @@ public sealed class RabbitToSubscriptions : BackgroundService
                     {
                         // Forward into GraphQL subscription pipeline
                         await _publisher.SendAsync(_startedTopic, evt, ct);
-                        await Task.Delay(5000);
                     }
                 };
 
