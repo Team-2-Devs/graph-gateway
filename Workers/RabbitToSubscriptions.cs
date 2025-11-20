@@ -75,6 +75,7 @@ public sealed class RabbitToSubscriptions : BackgroundService
                     {
                         // Forward into GraphQL subscription pipeline
                         await _publisher.SendAsync(_startedTopic, evt, ct);
+                        await Task.Delay(5000);
                     }
                 };
 
@@ -83,7 +84,10 @@ public sealed class RabbitToSubscriptions : BackgroundService
                 completed.ReceivedAsync += async (_, ea) =>
                 {
                     var evt = JsonSerializer.Deserialize<AnalysisCompleted>(ea.Body.Span, JsonOpts);
-                    if (evt is not null) await _publisher.SendAsync(_completedTopic, evt, ct);
+                    if (evt is not null) 
+                    {
+                        await _publisher.SendAsync(_completedTopic, evt, ct);
+                    }
                 };
 
                 // Start consuming both queues (autoAck enabled)
