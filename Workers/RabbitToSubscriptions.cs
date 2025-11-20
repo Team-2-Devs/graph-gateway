@@ -82,10 +82,24 @@ public sealed class RabbitToSubscriptions : BackgroundService
                 var completed = new AsyncEventingBasicConsumer(ch);
                 completed.ReceivedAsync += async (_, ea) =>
                 {
-                    var evt = JsonSerializer.Deserialize<AnalysisCompleted>(ea.Body.Span, JsonOpts);
-                    if (evt is not null) await _publisher.SendAsync(_completedTopic, evt, ct);
-                };
+                    try {
+                        var evt = JsonSerializer.Deserialize<AnalysisCompleted>(ea.Body.Span, JsonOpts);
+                        if (evt is null)
+                        {
+                            Console.WriteLine("[Graph] Failed to deserialize AnalysisCompleted (evt == null)");
+                            return;
+                        }
+                        Console.WriteLine("[Graph] Successfully deserialized AnalysisCompleted");
 
+                        if (evt is not null) await _publisher.SendAsync(_completedTopic, evt, ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("[Graph] Exception while deserializing AnalysisCompleted:");
+                        Console.WriteLine(ex);
+                    }
+
+                };
                 // Start consuming both queues (autoAck enabled)
                 await ch.BasicConsumeAsync(_graphStartedQueue, autoAck: true, started, ct);
                 await ch.BasicConsumeAsync(_graphCompletedQueue, autoAck: true, completed, ct);
